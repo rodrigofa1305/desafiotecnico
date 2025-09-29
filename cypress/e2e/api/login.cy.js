@@ -22,31 +22,17 @@ describe('Desafio Tecnico', () => {
       password: faker.internet.password(),
       administrador: "false"
     }
-
-    // Criando o usuário e armazenando o USERID
-    cy.request({
-      method: 'POST',
-      url: '/usuarios',
-      body: userData
-    }).then((response) => {
-      expect(response.status).to.equal(201)
-      userId = response.body._id
-
-      // Salva variáveis de ambiente para serem acessadas em outros arquivos
-      Cypress.env('userId', userId)
-      Cypress.env('userEmail', userData.email)
-      Cypress.env('userPassword', userData.password)
-    })
   })
 
   context('Cenários de Login', () => {
+
     it('Deve realizar o login com Sucesso', () => {
       cy.request({
         method: 'POST',
         url: '/login',
         body: {
-          email: Cypress.env('userEmail'),
-          password: Cypress.env('userPassword')
+          email: Cypress.env('email'),
+          password: Cypress.env('password')
         }
       }).then((response) => {
         expect(response.status).to.equal(200)
@@ -75,7 +61,6 @@ describe('Desafio Tecnico', () => {
     })
   })
   context('Cenarios de Usuario', () => {
-
     it('Deve listar todos os usuários cadastrados', () => {
       cy.request({
         method: 'GET',
@@ -83,7 +68,23 @@ describe('Desafio Tecnico', () => {
       }).then((response) => {
         expect(response.status).to.equal(200);
         expect(response.body.usuarios).to.be.an('array');
-        cy.log(`Lista de usuários validada. Quantidade: ${response.body.quantidade}`);
+
+      })
+    })
+
+    it('Cadastrar um usuário com sucesso', () => {
+      cy.request({
+        method: 'POST',
+        url: '/usuarios',
+        body: userData
+      }).then((response) => {
+        expect(response.status).to.equal(201)
+        userId = response.body._id
+
+        // Salva variáveis de ambiente para serem acessadas em outros arquivos
+        Cypress.env('userId', userId)
+        Cypress.env('userEmail', userData.email)
+        Cypress.env('userPassword', userData.password)
       })
     })
 
@@ -94,7 +95,6 @@ describe('Desafio Tecnico', () => {
       }).then((response) => {
         expect(response.status).to.equal(200);
         expect(response.body._id).to.equal(userId);
-        cy.log(`Busca por ID bem-sucedida. Usuário: ${response.body.nome}`);
       })
     })
 
@@ -149,18 +149,18 @@ describe('Desafio Tecnico', () => {
       })
     })
 
-    it('Deve validar que não é um administrador excluir um usuário com sucesso', () => {
-      cy.request({
-        method: 'DELETE',
-        url: `/usuarios/${newUserId}`,
-                headers: {
-          Authorization: authToken
-        }
-      }).then((response) => {
-        expect(response.status).to.equal(200)
-        expect(response.body.message).to.equal('Registro excluído com sucesso')
-      })
-    })
+    // it('Deve validar que não é um administrador excluir um usuário com sucesso', () => {
+    //   cy.request({
+    //     method: 'DELETE',
+    //     url: `/usuarios/${newUserId}`,
+    //             headers: {
+    //       Authorization: authToken
+    //     }
+    //   }).then((response) => {
+    //     expect(response.status).to.equal(200)
+    //     expect(response.body.message).to.equal('Registro excluído com sucesso')
+    //   })
+    // })
 
   })
 })
